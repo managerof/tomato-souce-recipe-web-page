@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasty Tomatoes</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            background-color: #f0f0f0;
+            overflow: auto; /* Allow page scrolling */
+            position: relative; /* Required for tomato positioning */
+        }
+
+        nav {
+            width: 100%;
+            background-color: #dd2606;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 0 15px;
+            border-radius: 5px;
+        }
+
+        nav a:hover {
+            background-color: #F23304;
+        }
+
+        .main {
+            margin: 60px auto 20px auto;
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 5; /* Ensure main content stays above tomatoes */
+            position: relative; /* To allow tomatoes to go behind */
+        }
+
+        .main img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 40px;
+        }
+
+        h2, p {
+            margin: 10px 0;
+        }
+
+        ol {
+            text-align: left;
+            padding-left: 20px;
+        }
+
+        ol li {
+            margin-left: 20px;
+        }
+
+        .ingredients p {
+            margin: 5px 0;
+        }
+
+        .tomato-image {
+            position: absolute;
+            max-width: 150px;
+            cursor: grab;
+            z-index: 1; /* Initial z-index for tomatoes */
+        }
+
+        .tomato-image:active {
+            cursor: grabbing;
+        }
+
+        .main-container {
+            z-index: 5;
+        }
+        ::selection {
+            background: url(background-tomato.png,);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">More Recipes</a>
+        <button onclick="addTomato()">Add Tomato</button>
+    </nav>
+    <div class="main-container">
+        <div class="main">
+            <img src="https://www.yumsome.com/wp-content/uploads/2015/05/classic-italian-tomato-sauce-hero.jpg" alt="tomato sauce image (looks very tasty)" style="height: 400px;">
+            <h1>A Recipe for Tomato Sauce</h1>
+            <h2>Making the perfect tomato sauce requires three things:</h2>
+            <ol>
+                <li>Top-quality ingredients</li>
+                <li>Care and attention to detail</li>
+                <li>Endless patience</li>
+            </ol>
+            <div class="ingredients">
+                <p>You will need a big splash of olive oil,</p>
+                <p>one finely chopped onion, several cloves of minced garlic,</p>
+                <p>a tin of chopped tomatoes, a tin of tomato puree,</p>
+                <p>a pinch of dried oregano, half a teaspoon of sugar, and salt and pepper.</p>
+            </div>
+            <h2>Here's how to do it:</h2>
+            <ol>
+                <li>Fry the garlic in the olive oil.</li>
+                <li>Drop in the chopped onions.</li>
+                <li>Continue to fry until onions are soft and have started to colour.</li>
+                <li>Add both tins, the dried oregano, and the sugar.</li>
+                <li>Lower the heat and cook for a very long time.</li>
+                <li>Wait until most of the water has evaporated and the olive oil appears around the edge of the pan.</li>
+                <li>Finish with salt and pepper to taste.</li>
+            </ol>
+            <h2>Enjoy on pasta or poured over sausages!</h2>
+        </div>
+    </div>    
+
+    <script>
+        const tomatoSize = 150;
+        let tomatoGrabX = -1;
+        let tomatoGrabY = -1;
+
+        function getDistance(x1, y1, x2, y2) {
+            return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        }
+
+        const positions = []; // Store positions of tomatoes
+        const maxIterations = 100; // Limit to avoid infinite loops
+
+        function creatTomato(randomX, randomY) {
+            positions.push([randomX, randomY]);
+
+            const tomato = document.createElement('img');
+            tomato.src = 'background-tomato.png';
+            tomato.alt = 'Tomato';
+            tomato.className = 'tomato-image';
+
+            tomato.style.left = `${randomX}px`;
+            tomato.style.top = `${randomY}px`;
+
+            // Add drag functionality
+            tomato.addEventListener('mousedown', (e) => {
+                tomato.style.zIndex = 10; // Bring tomato to the foreground
+
+                tomatoGrabX = e.pageX - parseInt(tomato.style.left, 10); 
+                tomatoGrabY = e.pageY - parseInt(tomato.style.top, 10);
+
+                const onMouseMove = (event) => {
+                    const newX = event.pageX - tomatoGrabX;
+                    const newY = event.pageY - tomatoGrabY;
+                    tomato.style.left = `${newX}px`;
+                    tomato.style.top = `${newY}px`;
+                };
+
+                const onMouseUp = () => {
+                    tomato.style.zIndex = 1; // Send tomato back to default layer
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                };
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+
+                tomato.ondragstart = () => false;
+            });
+
+            document.body.appendChild(tomato);
+        }
+
+        function addTomato() {
+            const main = document.querySelector('.main'); // Get the main element
+            const mainRect = main.getBoundingClientRect(); // Get its position and dimensions
+
+            for (let i = 0; i < 1; i++) {
+                let validPosition = false;
+                let attempts = 0;
+                let randomX, randomY;
+
+                while (!validPosition && attempts < maxIterations) {
+                    randomX = Math.random() * (document.body.clientWidth - tomatoSize);
+                    randomY = Math.random() * (document.body.scrollHeight - tomatoSize);
+
+                    // Check if the position is valid
+                    validPosition =
+                        positions.every(([x, y]) => getDistance(randomX, randomY, x, y) >= tomatoSize) &&
+                        !(randomX + tomatoSize > (mainRect.left - (mainRect.left * 0.1)) && randomX < (mainRect.right - (mainRect.right * 0.1))); // Check if overlaps main horizontally
+
+                    attempts++;
+                }
+
+                creatTomato(randomX, randomY);
+            }
+        }
+
+        // Scatter tomatoes across the whole body
+        function scatterTomatoes() {
+            const main = document.querySelector('.main'); // Get the main element
+            const mainRect = main.getBoundingClientRect(); // Get its position and dimensions
+
+            for (let i = 0; i < 15; i++) {
+                let validPosition = false;
+                let attempts = 0;
+                let randomX, randomY;
+
+                while (!validPosition && attempts < maxIterations) {
+                    randomX = Math.random() * (document.body.clientWidth - tomatoSize);
+                    randomY = Math.random() * (document.body.scrollHeight - tomatoSize);
+
+                    // Check if the position is valid
+                    validPosition =
+                        positions.every(([x, y]) => getDistance(randomX, randomY, x, y) >= tomatoSize) &&
+                        !(randomX + tomatoSize > (mainRect.left + (mainRect.left * 0.1)) && randomX < (mainRect.right - (mainRect.right * 0.1))); // Check if overlaps main horizontally
+
+                    attempts++;
+                }
+
+                if (validPosition) {
+                    positions.push([randomX, randomY]);
+
+                    const tomato = document.createElement('img');
+                    tomato.src = 'background-tomato.png';
+                    tomato.alt = 'Tomato';
+                    tomato.className = 'tomato-image';
+
+                    tomato.style.left = `${randomX}px`;
+                    tomato.style.top = `${randomY}px`;
+
+                    // Add drag functionality
+                    tomato.addEventListener('mousedown', (e) => {
+                        tomato.style.zIndex = 10; // Bring tomato to the foreground
+
+                        tomatoGrabX = e.pageX - parseInt(tomato.style.left, 10); 
+                        tomatoGrabY = e.pageY - parseInt(tomato.style.top, 10);
+
+                        const onMouseMove = (event) => {
+                            const newX = event.pageX - tomatoGrabX;
+                            const newY = event.pageY - tomatoGrabY;
+                            tomato.style.left = `${newX}px`;
+                            tomato.style.top = `${newY}px`;
+                        };
+
+                        const onMouseUp = () => {
+                            tomato.style.zIndex = 1; // Send tomato back to default layer
+                            document.removeEventListener('mousemove', onMouseMove);
+                            document.removeEventListener('mouseup', onMouseUp);
+                        };
+
+                        document.addEventListener('mousemove', onMouseMove);
+                        document.addEventListener('mouseup', onMouseUp);
+
+                        tomato.ondragstart = () => false;
+                    });
+
+                    document.body.appendChild(tomato);
+                } else {
+                    console.warn(`Could not find a valid position for tomato ${i + 1} after ${maxIterations} attempts.`);
+                }
+            }
+        }
+
+        // Scatter tomatoes on window load
+        window.onload = scatterTomatoes;
+    </script>
+</body>
+</html>
